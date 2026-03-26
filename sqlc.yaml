@@ -1,0 +1,19 @@
+version: "2"
+servers: []
+sql:
+  - schema: "./db/migration"
+    queries: "./db/queries"
+    engine: "postgresql"
+    gen:
+      go:
+        package: "db"
+        out: "db/sqlc"
+        emit_json_tags: true # 生成的结构体字段会带上json标签
+        emit_db_tags: true #  生成的结构体字段会带上db标签
+        emit_interface: true # 生成接口，便于后续进行mock测试
+        emit_empty_slices: true
+        emit_prepared_queries: false # 生成预编译的查询方法
+        emit_exact_table_names: false # 生成的结构体名称与数据库表名称完全一致
+        overrides:
+          - db_type: "timestamptz"
+            go_type: "time.Time"

@@ -1,0 +1,29 @@
+
+### new accounts
+POST http://localhost:9899/accounts
+Content-Type: application/json
+
+{
+  "owner": "wuyue",
+  "currency": "USD"
+}
+
+### get account
+GET http://localhost:9899/accounts/2
+
+
+### get account list
+GET http://localhost:9899/accounts?page_id=1&page_size=5
+
+
+
+### create transfer
+POST http://localhost:9899/transfers
+Content-Type: application/json
+
+{
+  "from_account_id": 1,
+  "to_account_id": 2,
+  "amount": 100,
+  "currency": "USD"
+}
