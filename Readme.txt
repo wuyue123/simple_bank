@@ -8,6 +8,8 @@ document:
 https://docs.sqlc.dev/en/latest/tutorials/getting-started-postgresql.html
 
 
+migrate create -ext sql  -dir db/migration -seq add_users
+
 docker exec -it postgres psql -U root -d simple_bank
 
 begin;

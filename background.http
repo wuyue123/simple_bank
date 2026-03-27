@@ -4,7 +4,7 @@ POST http://localhost:9899/accounts
 Content-Type: application/json
 
 {
-  "owner": "wuyue",
+  "owner": "1YdCsL",
   "currency": "USD"
 }
 
@@ -26,4 +26,15 @@ Content-Type: application/json
   "to_account_id": 2,
   "amount": 100,
   "currency": "USD"
+}
+
+### create user
+POST http://localhost:9899/users
+Content-Type: application/json
+
+{
+  "username": "wuyue3",
+  "password": "123456",
+  "email": "1020@11.com",
+  "full_name": "USD"
 }
