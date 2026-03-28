@@ -29,8 +29,8 @@ func TestJwtMaker_CreateToken(t *testing.T) {
 	require.Equal(t, username, payload.Username)
 	require.Equal(t, role, payload.Role)
 	require.Equal(t, TokenTypeAccessToken, payload.Type)
-	require.WithinDuration(t, issuedAt, payload.IssuedAt.Time, time.Second)
-	require.WithinDuration(t, expiredAt, payload.ExpiresAt.Time, time.Second)
+	require.WithinDuration(t, issuedAt, payload.IssuedAt, time.Second)
+	require.WithinDuration(t, expiredAt, payload.ExpiredAt, time.Second)
 }
 
 // TestExpiredToken tests the behavior of the JwtMaker when the token is expired.

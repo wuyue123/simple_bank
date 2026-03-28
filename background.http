@@ -1,4 +1,4 @@
-@host=http://127.0.0.1:8081
+@host=http://127.0.0.1:8080
 
 ### new accounts
 POST {{host}}/accounts
@@ -37,7 +37,7 @@ Content-Type: application/json
 Authorization: Bearer {{login.response.body.access_token}}
 
 {
-  "username": "wuyue3",
+  "username": "wuyue",
   "password": "123456",
   "email": "1020@11.com",
   "full_name": "USD"
@@ -50,6 +50,15 @@ POST {{host}}/users/login
 Content-Type: application/json
 
 {
-  "username": "wuyue3",
+  "username": "wuyue",
   "password": "123456"
+}
+
+### refresh token
+# @name refresh_token
+POST {{host}}/token/renew_access 
+Content-Type: application/json
+
+{
+  "refresh_token": "{{login.response.body.refresh_token}}"
 }
