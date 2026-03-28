@@ -1,4 +1,4 @@
-@host=http://127.0.0.1:9899
+@host=http://127.0.0.1:8081
 
 ### new accounts
 POST {{host}}/accounts
