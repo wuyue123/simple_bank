@@ -179,7 +179,7 @@ func TestCreateUserAPI(t *testing.T) {
 			tc.buildStubs(store)
 
 			// start test server and send request
-			server := newTestServer(t,store)
+			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
@@ -196,17 +196,37 @@ func TestCreateUserAPI(t *testing.T) {
 	}
 }
 
-func requireBodyMatchUser(t *testing.T, body *bytes.Buffer, user db.User) {
-	data, err := io.ReadAll(body)
-	require.NoError(t, err)
+func TestLoginUserAPI(t *testing.T) {
+	user, password := randomUser(t)
+	testCases := []struct {
+		name          string
+		body          gin.H
+		buildStubs    func(store *mockdb.MockStore)
+		checkResponse func(recorder *httptest.ResponseRecorder)
+	}{
+		{
+			name: "OK",
+			body: gin.H{
+				"username": user.Username,
+				"password": password,
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					GetUser(gomock.Any(), gomock.Eq(user.Username)).
+					Times(1).
+					Return(user, nil)
+			},
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusOK, recorder.Code)
+				requireBodyMatchUser(t, recorder.Body, user)
+			},
+		},
+	}
 
-	var gotUser db.User
-	err = json.Unmarshal(data, &gotUser)
-	require.NoError(t, err)
-	require.Equal(t, gotUser.Username, user.Username)
-	require.Equal(t, gotUser.FullName, user.FullName)
-	require.Equal(t, gotUser.Email, user.Email)
-	require.Empty(t, gotUser.HashedPassword)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {})
+	}
+
 }
 
 func randomUser(t *testing.T) (user db.User, password string) {
@@ -221,4 +241,18 @@ func randomUser(t *testing.T) (user db.User, password string) {
 		Email:          util.RandomEmail(),
 	}
 	return
+}
+
+func requireBodyMatchUser(t *testing.T, body *bytes.Buffer, user db.User) {
+	data, err := io.ReadAll(body)
+	require.NoError(t, err)
+
+	var gotUser db.User
+	err = json.Unmarshal(data, &gotUser)
+
+	require.NoError(t, err)
+	require.Equal(t, user.Username, gotUser.Username)
+	require.Equal(t, user.FullName, gotUser.FullName)
+	require.Equal(t, user.Email, gotUser.Email)
+	require.Empty(t, gotUser.HashedPassword)
 }

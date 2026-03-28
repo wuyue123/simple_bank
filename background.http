@@ -1,25 +1,28 @@
+@host=http://127.0.0.1:9899
 
 ### new accounts
-POST http://localhost:9899/accounts
+POST {{host}}/accounts
 Content-Type: application/json
+Authorization: Bearer {{login.response.body.access_token}}
 
 {
-  "owner": "1YdCsL",
   "currency": "USD"
 }
 
 ### get account
-GET http://localhost:9899/accounts/2
+GET {{host}}/accounts/2
+Authorization: Bearer {{login.response.body.access_token}}
 
 
 ### get account list
-GET http://localhost:9899/accounts?page_id=1&page_size=5
-
+GET {{host}}/accounts?page_id=1&page_size=5
+Authorization: Bearer {{login.response.body.access_token}}
 
 
 ### create transfer
-POST http://localhost:9899/transfers
+POST {{host}}/transfers
 Content-Type: application/json
+Authorization: Bearer {{login.response.body.access_token}}
 
 {
   "from_account_id": 1,
@@ -29,12 +32,24 @@ Content-Type: application/json
 }
 
 ### create user
-POST http://localhost:9899/users
+POST {{host}}/users
 Content-Type: application/json
+Authorization: Bearer {{login.response.body.access_token}}
 
 {
   "username": "wuyue3",
   "password": "123456",
   "email": "1020@11.com",
   "full_name": "USD"
+}
+
+
+### login user
+# @name login
+POST {{host}}/users/login  
+Content-Type: application/json
+
+{
+  "username": "wuyue3",
+  "password": "123456"
 }

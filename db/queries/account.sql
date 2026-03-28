@@ -11,8 +11,9 @@ WHERE id = $1 LIMIT 1;
 -- name: ListAccounts :many
 SELECT *
 FROM accounts
+where owner = $1
 order by id
-LIMIT $1 OFFSET $2;
+LIMIT $2 OFFSET $3;
 
 -- name: GetAccountForUpdate :one
 SELECT *

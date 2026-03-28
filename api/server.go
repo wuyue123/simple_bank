@@ -32,7 +32,7 @@ type Server struct {
 
 // NewServer creates a new HTTP server and setup routing.
 func NewServer(store db.Store, config util.Config) (*Server, error) {
- 	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
+	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
 	if err != nil {
 		return nil, fmt.Errorf("error creating token maker: %w", err)
 	}
@@ -45,22 +45,26 @@ func NewServer(store db.Store, config util.Config) (*Server, error) {
 		_ = v.RegisterValidation("currency", validCurrency)
 	}
 	server.setupRouter()
-	
+
 	return server, nil
 }
 
 func (server *Server) setupRouter() {
 	router := gin.Default()
 	router.POST("/users", server.createUser)
+	router.POST("/users/login", server.loginUser)
 
-	router.POST("/accounts", server.createAccount)
-	router.GET("/accounts/:id", server.getAccount)
-	router.GET("/accounts", server.listAccount)
+	authRouter := router.Group("/").Use(authMiddleware(server.tokenMaker))
 
-	router.POST("/transfers", server.createTransfer)
+	authRouter.POST("/accounts", server.createAccount)
+	authRouter.GET("/accounts/:id", server.getAccount)
+	authRouter.GET("/accounts", server.listAccount)
+
+	authRouter.POST("/transfers", server.createTransfer)
 
 	server.router = router
 }
+
 // Start runs the HTTP server on a specific address.
 func (server *Server) Start(address string) error {
 	return server.router.Run(address)

@@ -6,5 +6,6 @@ import "time"
 // It returns a token and an error if the token cannot be created or verified.
 type Maker interface {
 	CreateToken(username string, role string, duration time.Duration, tokenType TokenType) (string, *Payload, error)
+
 	VerifyToken(token string, tokenType TokenType) (*Payload, error)
 }

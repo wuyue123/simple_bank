@@ -12,9 +12,8 @@
 package util
 
 import (
-	"math/rand"
+	"math/rand/v2"
 	"strings"
-	"time"
 )
 
 var alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
@@ -25,7 +24,7 @@ func RandomString(n int) string {
 	k := len(alphabet)
 
 	for i := 0; i < n; i++ {
-		c := alphabet[rand.Intn(k)]
+		c := alphabet[rand.N(k)]
 		sb.WriteByte(c)
 	}
 
@@ -37,15 +36,14 @@ func RandomOwner() string {
 	return RandomString(6)
 }
 
-// RandomInt generates a random integer between 0 and n-1.
-func RandomInt(n int) int {
-	rd := rand.New(rand.NewSource(time.Now().Unix()))
-	return rd.Intn(n)
+// RandomInt generates a random integer between min and max
+func RandomInt(min, max int64) int64 {
+	return min + rand.Int64N(max-min+1)
 }
 
 // RandomMoney generates a random amount of money between 0 and 1000.
 func RandomMoney() int64 {
-	return int64(RandomInt(1000))
+	return RandomInt(1, 1000)
 }
 
 func RandomEmail() string {
@@ -54,6 +52,7 @@ func RandomEmail() string {
 
 // RandomCurrency returns a random currency code.
 func RandomCurrency() string {
-	currencies := []string{"USD", "EUR", "CAD"}
-	return currencies[RandomInt(len(currencies))]
+	currencies := []string{USD, EUR, CAD}
+	n := len(currencies)
+	return currencies[rand.N(n)]
 }
