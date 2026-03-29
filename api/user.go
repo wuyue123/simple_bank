@@ -26,7 +26,7 @@ type userResponse struct {
 	FullName          string    `json:"full_name"`
 	Email             string    `json:"email"`
 	CreateAt          time.Time `json:"create_at"`
-	PasswordChangedAt time.Time `json:"password_create_at"`
+	PasswordChangedAt time.Time `json:"password_changed_at"`
 }
 
 // newUserResponse converts a db.User to a userResponse.

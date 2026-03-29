@@ -9,16 +9,16 @@ import "google/protobuf/timestamp.proto";
 option go_package = "pxsemic.com/simplebank/pb"; //生成的Go代码所在的包路径
 
 message LoginUserRequest {
-    string username = 1; //用户名
-    string password = 2; //密码
+  string username = 1; //用户名
+  string password = 2; //密码
 }
 
 message LoginUserResponse {
-    User user = 1; //用户信息
-    string session_id = 2; //会话ID
-    string access_token = 3; //访问令牌
-   google.protobuf.Timestamp  access_token_expires_at = 4; //访问令牌过期时间
-   string refresh_token = 5; //刷新令牌
-    google.protobuf.Timestamp refresh_token_expires_at = 6; //刷新令牌过期时间
+  User user = 1; //用户信息
+  string session_id = 2; //会话ID
+  string access_token = 3; //访问令牌
+  google.protobuf.Timestamp  access_token_expires_at = 4; //访问令牌过期时间
+  string refresh_token = 5; //刷新令牌
+  google.protobuf.Timestamp refresh_token_expires_at = 6; //刷新令牌过期时间
 }
 

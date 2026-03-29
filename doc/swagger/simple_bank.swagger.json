@@ -1,8 +1,13 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "将多个proto文件放在同一个包下，避免命名冲突",
-    "version": "version not set"
+    "title": "Simple Bank API",
+    "version": "1.2",
+    "contact": {
+      "name": "Tech School",
+      "url": "https://github.com/techschool",
+      "email": "techschool.guru@gmail.com"
+    }
   },
   "tags": [
     {
@@ -18,6 +23,8 @@
   "paths": {
     "/v1/create_user": {
       "post": {
+        "summary": "Create new user",
+        "description": "Use this API to create a new user",
         "operationId": "SimpleBank_CreateUser",
         "responses": {
           "200": {

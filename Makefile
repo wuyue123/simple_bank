@@ -61,5 +61,19 @@ build:
 run:
 	docker run --name simplebank --network bank-network -p 8081:8080 -e GIN_MODE=release -e DB_SOURCE="postgresql://root:secret@postgres:5432/simple_bank?sslmode=disable" simplebank:v1.0
 
+proto:
+	del /f /q pb\*.go
+	del /f /q doc\swagger\*swagger.json
+	protoc --proto_path=./proto --go_out=./pb --go_opt=paths=source_relative \
+		--go-grpc_out=./pb --go-grpc_opt=paths=source_relative \
+		--grpc-gateway_out ./pb --grpc-gateway_opt paths=source_relative \
+		--openapiv2_out=./doc/swagger --openapiv2_opt=allow_merge=true,merge_file_name=simple_bank \
+		proto/*.proto
+	statik -src=./doc/swagger -dest=./doc/
 
-.PHONY: migrateup1 migratedown1 sqlc test mock createdb postgres network dropdb clean mock dev run
+evans:
+	evans --host localhost --port 9091 -r repl
+	package pb
+	service SimpleBank
+
+.PHONY: migrateup1 migratedown1 sqlc test mock createdb postgres network dropdb clean mock dev run proto evans

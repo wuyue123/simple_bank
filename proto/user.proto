@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package pb; //将多个proto文件放在同一个包下，避免命名冲突
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "pxsemic.com/simplebank/pb"; //生成的Go代码所在的包路径
+
+message User {
+    string username = 1; //用户名
+    string full_name = 2; //全名
+    string email = 3; //邮箱
+    google.protobuf.Timestamp password_changed_at = 4; //密码修改时间
+    google.protobuf.Timestamp created_at = 5; //创建时间  
+}
