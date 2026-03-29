@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package pb; //将多个proto文件放在同一个包下，避免命名冲突
+
+import "user.proto";
+
+option go_package = "pxsemic.com/simplebank/pb"; //生成的Go代码所在的包路径
+
+message CreateUserRequest {
+    string username = 1; //用户名
+    string password = 2; //密码
+    string full_name = 3; //全名
+    string email = 4; //邮箱    
+}
+
+message CreateUserResponse {
+    User user = 1; //用户信息
+}

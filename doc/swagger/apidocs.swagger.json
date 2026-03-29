@@ -1,0 +1,215 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "将多个proto文件放在同一个包下，避免命名冲突",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "SimpleBank"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/create_user": {
+      "post": {
+        "operationId": "SimpleBank_CreateUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbCreateUserResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbCreateUserRequest"
+            }
+          }
+        ],
+        "tags": [
+          "SimpleBank"
+        ]
+      }
+    },
+    "/v1/login_user": {
+      "post": {
+        "operationId": "SimpleBank_LoginUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbLoginUserResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbLoginUserRequest"
+            }
+          }
+        ],
+        "tags": [
+          "SimpleBank"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "pbCreateUserRequest": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string",
+          "title": "用户名"
+        },
+        "password": {
+          "type": "string",
+          "title": "密码"
+        },
+        "fullName": {
+          "type": "string",
+          "title": "全名"
+        },
+        "email": {
+          "type": "string",
+          "title": "邮箱"
+        }
+      }
+    },
+    "pbCreateUserResponse": {
+      "type": "object",
+      "properties": {
+        "user": {
+          "$ref": "#/definitions/pbUser",
+          "title": "用户信息"
+        }
+      }
+    },
+    "pbLoginUserRequest": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string",
+          "title": "用户名"
+        },
+        "password": {
+          "type": "string",
+          "title": "密码"
+        }
+      }
+    },
+    "pbLoginUserResponse": {
+      "type": "object",
+      "properties": {
+        "user": {
+          "$ref": "#/definitions/pbUser",
+          "title": "用户信息"
+        },
+        "sessionId": {
+          "type": "string",
+          "title": "会话ID"
+        },
+        "accessToken": {
+          "type": "string",
+          "title": "访问令牌"
+        },
+        "accessTokenExpiresAt": {
+          "type": "string",
+          "format": "date-time",
+          "title": "访问令牌过期时间"
+        },
+        "refreshToken": {
+          "type": "string",
+          "title": "刷新令牌"
+        },
+        "refreshTokenExpiresAt": {
+          "type": "string",
+          "format": "date-time",
+          "title": "刷新令牌过期时间"
+        }
+      }
+    },
+    "pbUser": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string",
+          "title": "用户名"
+        },
+        "fullName": {
+          "type": "string",
+          "title": "全名"
+        },
+        "email": {
+          "type": "string",
+          "title": "邮箱"
+        },
+        "passwordChangedAt": {
+          "type": "string",
+          "format": "date-time",
+          "title": "密码修改时间"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "title": "创建时间"
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  }
+}
