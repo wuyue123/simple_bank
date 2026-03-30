@@ -69,6 +69,8 @@ proto:
 		--grpc-gateway_out ./pb --grpc-gateway_opt paths=source_relative \
 		--openapiv2_out=./doc/swagger --openapiv2_opt=allow_merge=true,merge_file_name=simple_bank \
 		proto/*.proto
+
+	del /f /q doc\statik\*.go
 	statik -src=./doc/swagger -dest=./doc/
 
 evans:

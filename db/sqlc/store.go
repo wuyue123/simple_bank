@@ -54,7 +54,7 @@ func (store *SQLStore) execTx(ctx context.Context, fn func(*Queries) error) erro
 	return tx.Commit()
 }
 
-// TransferTx performs a money transfer from one account to the other.
+// TransferTxParams TransferTx performs a money transfer from one account to the other.
 // It creates a transfer record, add account entries, and update accounts' balance within a single database transaction.
 type TransferTxParams struct {
 	FromAccountID int64 `json:"from_account_id"`
