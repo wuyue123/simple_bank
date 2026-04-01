@@ -19,8 +19,10 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/hibiken/asynq"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"pxsemic.com/simplebank/worker"
 
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
@@ -57,11 +59,24 @@ func main() {
 	}
 	store := db.NewStore(conn)
 	runMigrationDb(config.MigrationURL, config.DBSource)
+	redisOpt := asynq.RedisClientOpt{
+		Addr: config.RedisAddress,
+	}
+	taskDistributor := worker.NewRedisTaskDistributor(redisOpt)
 
-	go runGatewayServer(config, store)
-	runGrpcServer(config, store)
+	go runTaskProcessor(redisOpt, store)
+	go runGatewayServer(config, store, taskDistributor)
+	runGrpcServer(config, store, taskDistributor)
 
 	//runHttpServer(config, store)
+}
+
+func runTaskProcessor(redisOpt asynq.RedisClientOpt, store db.Store) {
+	taskProcessor := worker.NewRedisTaskProcessor(store, redisOpt)
+	log.Info().Msg("start task processor")
+	if err := taskProcessor.Start(); err != nil {
+		log.Fatal().Err(err).Msg("failed to start task processor")
+	}
 }
 
 // runMigrationDb 运行数据库迁移
@@ -77,8 +92,8 @@ func runMigrationDb(migrationURL string, dbSource string) {
 }
 
 // runGrpcServer 运行gRPC服务器
-func runGrpcServer(config util.Config, store db.Store) {
-	server, err := gapi.NewServer(store, config)
+func runGrpcServer(config util.Config, store db.Store, taskDistributor worker.TaskDistributor) {
+	server, err := gapi.NewServer(store, config, taskDistributor)
 	if err != nil {
 		log.Fatal().Err(err).Msg("can't create gapi server")
 	}
@@ -100,33 +115,30 @@ func runGrpcServer(config util.Config, store db.Store) {
 }
 
 // runGatewayServer 运行gRPC网关服务器
-func runGatewayServer(config util.Config, store db.Store) {
-	server, err := gapi.NewServer(store, config)
+func runGatewayServer(config util.Config, store db.Store, taskDistributor worker.TaskDistributor) {
+	server, err := gapi.NewServer(store, config, taskDistributor)
 	if err != nil {
 		log.Fatal().Err(err).Msg("can't create gapi server")
 	}
 
-	grpcMux := runtime.NewServeMux(
-		runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{
-			MarshalOptions: protojson.MarshalOptions{
-				UseProtoNames: true,
-			},
-			UnmarshalOptions: protojson.UnmarshalOptions{
-				DiscardUnknown: true,
-			},
-		}),
-	)
-
+	jsonOption := runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{
+		MarshalOptions: protojson.MarshalOptions{
+			UseProtoNames: true,
+		},
+		UnmarshalOptions: protojson.UnmarshalOptions{
+			DiscardUnknown: true,
+		},
+	})
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-
+	grpcMux := runtime.NewServeMux(jsonOption)
 	err = pb.RegisterSimpleBankHandlerServer(ctx, grpcMux, server)
 	if err != nil {
-		log.Fatal().Err(err).Msg("failed to register gRPC gateway handler")
+		log.Fatal().Err(err).Msg("cannot register handler server")
 	}
 
-	httpMux := http.NewServeMux()
-	httpMux.Handle("/", grpcMux)
+	mux := http.NewServeMux()
+	mux.Handle("/", grpcMux)
 
 	statikFS, err := fs.New()
 	if err != nil {
@@ -134,15 +146,16 @@ func runGatewayServer(config util.Config, store db.Store) {
 	}
 
 	swaggerHandler := http.StripPrefix("/swagger/", http.FileServer(statikFS))
-	httpMux.Handle("/swagger/", swaggerHandler)
+	mux.Handle("/swagger/", swaggerHandler)
 
-	listener, err := net.Listen("tcp", config.HTTPServerAddress)
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to listen gRPC gateway server")
+	handler := gapi.HttpLogger(mux)
+	httpServer := &http.Server{
+		Handler: handler,
+		Addr:    config.HTTPServerAddress,
 	}
-	log.Printf("start gRPC gateway server at %s", listener.Addr().String())
-	err = http.Serve(listener, httpMux)
-	if err != nil {
+
+	log.Printf("start http gateway server at %s", httpServer.Addr)
+	if err = httpServer.ListenAndServe(); err != nil {
 		log.Fatal().Err(err).Msg("failed to start gRPC gateway server")
 	}
 }

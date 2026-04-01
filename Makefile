@@ -78,4 +78,8 @@ evans:
 	package pb
 	service SimpleBank
 
+redis:
+	docker run --name redis -p 6379:6379 -d redis:7-alpine
+
+
 .PHONY: migrateup1 migratedown1 sqlc test mock createdb postgres network dropdb clean mock dev run proto evans

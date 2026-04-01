@@ -3,7 +3,9 @@ package gapi
 import (
 	"context"
 	"errors"
+	"time"
 
+	"github.com/hibiken/asynq"
 	"github.com/lib/pq"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
@@ -12,6 +14,7 @@ import (
 	"pxsemic.com/simplebank/pb"
 	"pxsemic.com/simplebank/util"
 	"pxsemic.com/simplebank/val"
+	"pxsemic.com/simplebank/worker"
 )
 
 func (server *Server) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
@@ -23,13 +26,27 @@ func (server *Server) CreateUser(ctx context.Context, req *pb.CreateUserRequest)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to hash password: %v", err)
 	}
-	arg := db.CreateUserParams{
-		Username:       req.GetUsername(),
-		FullName:       req.GetFullName(),
-		HashedPassword: hashedPassword,
-		Email:          req.GetEmail(),
+	arg := db.CreateUserTxParams{
+		CreateUserParams: db.CreateUserParams{
+			Username:       req.GetUsername(),
+			FullName:       req.GetFullName(),
+			HashedPassword: hashedPassword,
+			Email:          req.GetEmail(),
+		},
+		AfterCreate: func(user db.User) error {
+			taskPayload := &worker.PayloadSendVerifyEmail{
+				Username: user.Username,
+			}
+			opts := []asynq.Option{
+				asynq.MaxRetry(10),
+				asynq.ProcessIn(10 * time.Second),
+				asynq.Queue(worker.QueueCritical),
+			}
+			return server.taskDistributor.DistributorTaskSendVerifyEmail(ctx, taskPayload, opts...)
+		},
 	}
-	user, err := server.store.CreateUser(ctx, arg)
+
+	result, err := server.store.CreateUserTx(ctx, arg)
 	if err != nil {
 		var pgErr *pq.Error
 		if errors.As(err, &pgErr) {
@@ -42,7 +59,7 @@ func (server *Server) CreateUser(ctx context.Context, req *pb.CreateUserRequest)
 	}
 
 	rsp := &pb.CreateUserResponse{
-		User: convertUser(user),
+		User: convertUser(result.User),
 	}
 	return rsp, nil
 }
