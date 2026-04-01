@@ -35,6 +35,7 @@ func NewRedisTaskProcessor(db db.Store, redisOpt asynq.RedisClientOpt) TaskProce
 				log.Error().Err(err).Str("type", task.Type()).
 					Bytes("payload", task.Payload()).Msg("process task failed")
 			}),
+			Logger: NewLogger(),
 		},
 	)
 
