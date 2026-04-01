@@ -49,8 +49,8 @@ func main() {
 	}
 
 	if config.Environment == "development" {
-		log.Info().Msgf("start app in %s mode", config.Environment)
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+		log.Info().Msgf("start app in %s mode", config.Environment)
 	}
 
 	conn, err := sql.Open(config.DBDriver, config.DBSource)

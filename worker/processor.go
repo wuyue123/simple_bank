@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/hibiken/asynq"
+	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog/log"
 	db "pxsemic.com/simplebank/db/sqlc"
 )
@@ -24,6 +25,8 @@ type RedisTaskProcessor struct {
 }
 
 func NewRedisTaskProcessor(db db.Store, redisOpt asynq.RedisClientOpt) TaskProcessor {
+
+	logger := NewLogger()
 	server := asynq.NewServer(
 		redisOpt,
 		asynq.Config{
@@ -35,9 +38,10 @@ func NewRedisTaskProcessor(db db.Store, redisOpt asynq.RedisClientOpt) TaskProce
 				log.Error().Err(err).Str("type", task.Type()).
 					Bytes("payload", task.Payload()).Msg("process task failed")
 			}),
-			Logger: NewLogger(),
+			Logger: logger,
 		},
 	)
+	redis.SetLogger(logger) // 替换go-redis包 logger为我们自定义的logger
 
 	return &RedisTaskProcessor{
 		store:  db,
