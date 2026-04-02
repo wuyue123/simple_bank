@@ -40,6 +40,9 @@ migrateup1:
 migratedown1:
 	migrate -path db/migration -database "$(DB_URL)" -verbose down 1
 
+newmigration:
+	migrate create -ext sql  -dir db/migration -seq  $(name)
+
 
 sqlc:
 	sqlc generate

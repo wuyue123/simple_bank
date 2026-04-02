@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package pb; //将多个proto文件放在同一个包下，避免命名冲突
+
+option go_package = "pxsemic.com/simplebank/pb"; //生成的Go代码所在的包路径
+
+message VerifyEmailRequest {
+  int64 email_id = 1;
+  string secret_code = 2;
+}
+
+message VerifyEmailResponse {
+  bool is_verified = 1;
+}

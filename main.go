@@ -22,6 +22,7 @@ import (
 	"github.com/hibiken/asynq"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"pxsemic.com/simplebank/mail"
 	"pxsemic.com/simplebank/worker"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -47,9 +48,12 @@ func main() {
 	if err != nil {
 		log.Fatal().Err(err).Msg("can't load config app.env. err:")
 	}
-
+	zerolog.TimeFieldFormat = "2006-01-02 15:04:05.000"
 	if config.Environment == "development" {
-		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+		log.Logger = log.Output(zerolog.ConsoleWriter{
+			Out:        os.Stderr,
+			TimeFormat: "2006-01-02 15:04:05.000", // 设置时间格式
+		})
 		log.Info().Msgf("start app in %s mode", config.Environment)
 	}
 
@@ -64,15 +68,17 @@ func main() {
 	}
 	taskDistributor := worker.NewRedisTaskDistributor(redisOpt)
 
-	go runTaskProcessor(redisOpt, store)
+	go runTaskProcessor(config, redisOpt, store)
 	go runGatewayServer(config, store, taskDistributor)
 	runGrpcServer(config, store, taskDistributor)
 
 	//runHttpServer(config, store)
 }
 
-func runTaskProcessor(redisOpt asynq.RedisClientOpt, store db.Store) {
-	taskProcessor := worker.NewRedisTaskProcessor(store, redisOpt)
+func runTaskProcessor(config util.Config, redisOpt asynq.RedisClientOpt, store db.Store) {
+	mailer := mail.NewYMailSend(config.EmailSenderName, config.EmailSenderEmail, config.EmailSenderPassword)
+
+	taskProcessor := worker.NewRedisTaskProcessor(store, redisOpt, mailer)
 	log.Info().Msg("start task processor")
 	if err := taskProcessor.Start(); err != nil {
 		log.Fatal().Err(err).Msg("failed to start task processor")
