@@ -2,7 +2,6 @@ package gapi
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
@@ -23,7 +22,7 @@ func (server *Server) LoginUser(ctx context.Context, req *pb.LoginUserRequest) (
 	}
 	user, err := server.store.GetUser(ctx, req.Username)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, db.ErrRecordNotFound) {
 			return nil, status.Errorf(codes.NotFound, "user name already exist: %v", err)
 		}
 		return nil, status.Errorf(codes.Internal, "failed to get user: %v", err)

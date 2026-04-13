@@ -12,8 +12,8 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/mock/gomock"
 	mockdb "pxsemic.com/simplebank/db/mock"
 	db "pxsemic.com/simplebank/db/sqlc"
 	"pxsemic.com/simplebank/util"
@@ -233,7 +233,7 @@ func TestLoginUserAPI(t *testing.T) {
 				store.EXPECT().
 					GetUser(gomock.Any(), gomock.Any()).
 					Times(1).
-					Return(db.User{}, sql.ErrNoRows)
+					Return(db.User{}, db.ErrRecordNotFound)
 				store.EXPECT().
 					CreateSession(gomock.Any(), gomock.Any()).
 					Times(0)

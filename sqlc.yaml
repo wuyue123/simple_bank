@@ -1,5 +1,5 @@
 version: "2"
-servers: []
+servers: [ ]
 sql:
   - schema: "./db/migration"
     queries: "./db/queries"
@@ -8,6 +8,7 @@ sql:
       go:
         package: "db"
         out: "db/sqlc"
+        sql_package: "pgx/v5"
         emit_json_tags: true # 生成的结构体字段会带上json标签
         emit_db_tags: true #  生成的结构体字段会带上db标签
         emit_interface: true # 生成接口，便于后续进行mock测试
@@ -16,4 +17,6 @@ sql:
         emit_exact_table_names: false # 生成的结构体名称与数据库表名称完全一致
         overrides:
           - db_type: "timestamptz"
-            go_type: "time.Time"
+            go_type: "time.Time"            ]ju
+          - db_type: "uuid"
+            go_type: "github.com/google/uuid.UUID"

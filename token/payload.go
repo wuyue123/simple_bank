@@ -17,8 +17,8 @@ var (
 type TokenType byte
 
 const (
-	TokenTypeAccessToken  = 1
-	TokenTypeRefreshToken = 2
+	TokenTypeAccessToken  TokenType = 1
+	TokenTypeRefreshToken TokenType = 2
 )
 
 // Payload contains the payload data of the token

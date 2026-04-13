@@ -2,10 +2,10 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"testing"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/require"
 	"pxsemic.com/simplebank/util"
 )
@@ -21,7 +21,7 @@ func createRandomUser(t *testing.T) User {
 		Email:          util.RandomEmail(),
 	}
 
-	user, err := testQueries.CreateUser(context.Background(), arg)
+	user, err := testStore.CreateUser(context.Background(), arg)
 
 	require.NoError(t, err)
 	require.NotEmpty(t, user)
@@ -45,7 +45,7 @@ func TestCreateUser(t *testing.T) {
 func TestGetUser(t *testing.T) {
 	user1 := createRandomUser(t)
 
-	user, err := testQueries.GetUser(context.Background(), user1.Username)
+	user, err := testStore.GetUser(context.Background(), user1.Username)
 	require.NoError(t, err)
 	require.NotEmpty(t, user)
 
@@ -60,9 +60,9 @@ func TestUpdateUserOnlyFullname(t *testing.T) {
 	user := createRandomUser(t)
 	newFullName := util.RandomOwner()
 
-	updatedUser, err := testQueries.UpdateUser(context.Background(), UpdateUserParams{
+	updatedUser, err := testStore.UpdateUser(context.Background(), UpdateUserParams{
 		Username: user.Username,
-		FullName: sql.NullString{
+		FullName: pgtype.Text{
 			String: newFullName,
 			Valid:  true,
 		},
@@ -80,9 +80,9 @@ func TestUpdateUserOnlyEmail(t *testing.T) {
 	user := createRandomUser(t)
 	newEmail := util.RandomEmail()
 
-	updatedUser, err := testQueries.UpdateUser(context.Background(), UpdateUserParams{
+	updatedUser, err := testStore.UpdateUser(context.Background(), UpdateUserParams{
 		Username: user.Username,
-		Email: sql.NullString{
+		Email: pgtype.Text{
 			String: newEmail,
 			Valid:  true,
 		},
